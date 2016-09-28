@@ -1,0 +1,5 @@
+services:
+  auth0.route_subscriber:
+    class: Drupal\auth0\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,6 @@
+auth0.login:
+  path: '/auth0/login'
+  defaults:
+    _controller: '\Drupal\auth0\Controller\LoginController::loginCallback'
+  requirements:
+    _user_is_logged_in: 'FALSE'

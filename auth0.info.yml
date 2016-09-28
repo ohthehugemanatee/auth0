@@ -1,0 +1,7 @@
+name: Auth0
+type: module
+description: Provides Auth0 single sign on for Drupal
+core: 8.x
+package: Custom
+dependencies:
+  - externalauth

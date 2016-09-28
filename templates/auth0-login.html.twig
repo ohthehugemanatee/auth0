@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a link to login at Auth0
+ *
+ * Available variables:
+ * - callback_url: The callback URL that Auth0 should hit to report login success/failure
+ * - domain: The API key domain
+ * - client_id: The client ID
+ *
+ * @see template_preprocess_auth0_login()
+ *
+ * @ingroup themeable
+ */
+#}
+<div id="auth0-login-form" style=" min-height: 440px;"></div>
+
+<script>
+
+    var lock = new Auth0Lock("{{ client_id }}", "{{ domain }}");
+
+    lock.show({
+        container: 'auth0-login-form'
+        , callbackURL: '{{ callback_url }}'
+        , responseType: 'code'
+        , authParams: {
+            scope: 'openid email'  // Learn about scopes: https://auth0.com/docs/scopes
+        }
+    });
+</script>

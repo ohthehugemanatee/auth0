@@ -1,0 +1,10 @@
+auth0.lock:
+  remote: https://github.com/auth0/lock
+  version: 9.1
+  license:
+    name: MIT
+    url: https://github.com/auth0/lock/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    //cdn.auth0.com/js/lock-9.1.min.js: { type: external, minified: true }
+  header: true

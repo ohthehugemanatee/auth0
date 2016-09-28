@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * @file
+ * Contains auth0.module..
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function auth0_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the auth0 module.
+    case 'help.page.auth0':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides Auth0 single sign on for Drupal') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * - Remove Drupal's login elements from user_login_form
+ * - Add Auth0 login form to user_login_form
+ */
+function auth0_form_user_login_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // If Auth0 is disabled in settings.php, skip this hook.
+  $settings = \Drupal\core\site\settings::get('auth0');
+  if ($settings['disabled'] == TRUE) {
+    return;
+  }
+
+  // Remove the old form elements.
+  foreach (\Drupal\Core\Render\Element::children($form) as $child) {
+    unset($form[$child]);
+  }
+
+  $form['auth0-root'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'id' => 'auth0-root',
+      ),
+    '#theme' => 'auth0_login',
+    '#attached' => array(
+      'library' => array(
+        'auth0/auth0.lock',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * - Remove the 'change password' fields from user_form
+ * - Remove reference to changing passwords from 'current password' field description
+ */
+function auth0_form_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // If a password_confirm form element exists where "change password" normally exists...
+  if (!empty($form['account']['pass']) && $form['account']['pass']['#type'] == 'password_confirm') {
+    // Remove the "change password" field.
+    unset($form['account']['pass']);
+    // Rewrite the description for "Current password" so it doesn't reference the missing field.
+    if (!empty($form['account']['current_pass'])) {
+      $form['account']['current_pass']['#description'] = t('Required if you want to change the %mail below.', array(
+        '%mail' => $form['account']['mail']['#title'],
+      ));
+    }
+  }
+}
+
+/**
+ * Implements hook_theme()
+ * - Declare the auth0 form element theme.
+ */
+function auth0_theme() {
+  return array(
+    'auth0_login' => array(
+      'variables' => array(
+        'callback_url' => NULL,
+        'domain' => NULL,
+        'client_id' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Preprocess the auth0 form element to pass in auth0 configuration info.
+ */
+function template_preprocess_auth0_login(&$vars) {
+  $client_config = \Drupal\core\site\settings::get('auth0')['client'];
+  //$client_config = \Drupal::config('auth0')->get('client');
+  $vars['callback_url'] = $client_config['redirect_uri'];
+  $vars['domain'] = $client_config['domain'];
+  $vars['client_id'] = $client_config['client_id'];
+}
